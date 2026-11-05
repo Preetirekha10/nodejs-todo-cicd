@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My To-Do List</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; min-height: 100vh; padding: 48px 16px;
+      font-family: Arial, sans-serif; background: #f3f5f9; color: #202536;
+    }
+    main {
+      max-width: 560px; margin: auto; padding: 28px;
+      background: white; border-radius: 16px;
+      box-shadow: 0 12px 35px rgba(20, 30, 60, .09);
+    }
+    h1 { margin: 0 0 8px; }
+    .sub { color: #687086; margin: 0 0 24px; }
+    form { display: flex; gap: 10px; }
+    input {
+      flex: 1; min-width: 0; padding: 13px;
+      border: 1px solid #d9deea; border-radius: 8px; font-size: 15px;
+    }
+    button {
+      border: 0; border-radius: 8px; padding: 12px 16px;
+      background: #315efb; color: white; cursor: pointer; font-weight: 600;
+    }
+    button:hover { background: #244bd0; }
+    ul { list-style: none; padding: 0; margin: 22px 0 0; }
+    li {
+      display: flex; align-items: center; gap: 10px;
+      padding: 13px 0; border-bottom: 1px solid #edf0f5;
+    }
+    li span { flex: 1; overflow-wrap: anywhere; }
+    li.done span { color: #8a91a2; text-decoration: line-through; }
+    .delete { background: #fce8e8; color: #bd3030; padding: 8px 11px; }
+    .delete:hover { background: #f8d6d6; }
+    .empty { color: #8a91a2; text-align: center; padding: 20px 0; }
+    #message { color: #bd3030; min-height: 18px; margin-top: 10px; font-size: 13px; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>My To-Do List</h1>
+    <p class="sub">Add tasks, track progress, and stay organized.</p>
+    <form id="todo-form">
+      <input id="task-input" type="text" placeholder="What do you need to do?" maxlength="120" required />
+      <button type="submit">Add task</button>
+    </form>
+    <div id="message" role="status"></div>
+    <ul id="todo-list"></ul>
+  </main>
+  <script>
+    const form = document.getElementById("todo-form");
+    const input = document.getElementById("task-input");
+    const list = document.getElementById("todo-list");
+    const message = document.getElementById("message");
+
+    async function request(url, options = {}) {
+      const response = await fetch(url, {
+        headers: { "Content-Type": "application/json" },
+        ...options
+      });
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({}));
+        throw new Error(error.error || "Something went wrong.");
+      }
+      return response.status === 204 ? null : response.json();
+    }
+
+    async function renderTodos() {
+      try {
+        const todos = await request("/api/todos");
+        list.innerHTML = "";
+        if (!todos.length) {
+          const empty = document.createElement("li");
+          empty.className = "empty";
+          empty.textContent = "No tasks yet. Add your first task above.";
+          list.appendChild(empty);
+          return;
+        }
+
+        todos.forEach(todo => {
+          const item = document.createElement("li");
+          if (todo.completed) item.classList.add("done");
+
+          const checkbox = document.createElement("input");
+          checkbox.type = "checkbox";
+          checkbox.checked = todo.completed;
+          checkbox.setAttribute("aria-label", `Mark ${todo.title} complete`);
+          checkbox.addEventListener("change", async () => {
+            await request(`/api/todos/${todo.id}`, {
+              method: "PATCH",
+              body: JSON.stringify({ completed: checkbox.checked })
+            });
+            renderTodos();
+          });
+
+          const title = document.createElement("span");
+          title.textContent = todo.title;
+
+          const remove = document.createElement("button");
+          remove.className = "delete";
+          remove.textContent = "Delete";
+          remove.addEventListener("click", async () => {
+            await request(`/api/todos/${todo.id}`, { method: "DELETE" });
+            renderTodos();
+          });
+
+          item.append(checkbox, title, remove);
+          list.appendChild(item);
+        });
+      } catch (error) {
+        message.textContent = error.message;
+      }
+    }
+
+    form.addEventListener("submit", async event => {
+      event.preventDefault();
+      message.textContent = "";
+      const title = input.value.trim();
+      if (!title) return;
+      try {
+        await request("/api/todos", {
+          method: "POST",
+          body: JSON.stringify({ title })
+        });
+        input.value = "";
+        renderTodos();
+      } catch (error) {
+        message.textContent = error.message;
+      }
+    });
+
+    renderTodos();
+  </script>
+</body>
+</html>
