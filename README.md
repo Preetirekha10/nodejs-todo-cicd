@@ -1,12 +1,12 @@
-Automated CI/CD Pipeline for Node.js To-Do Application
+##Automated CI/CD Pipeline for Node.js To-Do Application
 
-Project Overview
+##Project Overview
 
 This project demonstrates an automated CI/CD pipeline for deploying a Node.js To-Do application using AWS EC2, Jenkins, GitHub, GitHub Webhooks, and Docker.
 
 Whenever new code is pushed to the GitHub repository, a webhook triggers Jenkins. Jenkins automatically fetches the latest code, builds a Docker image, and deploys the application inside a Docker container on the AWS EC2 instance.
 
-Technologies Used
+##Technologies Used
 
 - AWS EC2 – Cloud server for hosting the application and Jenkins
 - GitHub – Source code management
@@ -17,11 +17,11 @@ Technologies Used
 - Express.js – Web application framework
 - Ubuntu – EC2 operating system
 
-Project Architecture
+##Project Architecture
 
 Developer → GitHub Repository → GitHub Webhook → Jenkins Pipeline → Docker Image → Docker Container → Running To-Do Application
 
-CI/CD Pipeline Workflow
+##CI/CD Pipeline Workflow
 
 1. Developer pushes code changes to GitHub.
 2. GitHub Webhook sends a notification to Jenkins.
@@ -32,7 +32,7 @@ CI/CD Pipeline Workflow
 7. Jenkins deploys a new Docker container.
 8. The application becomes accessible through the EC2 public IP.
 
-Jenkins Pipeline Stages
+##Jenkins Pipeline Stages
 
 - Checkout: Retrieves source code from GitHub.
 - Build Docker Image: Builds the Docker image.
@@ -40,7 +40,7 @@ Jenkins Pipeline Stages
 - Deploy Application: Starts the updated application container.
 - Verify Deployment: Checks the running Docker container.
 
-Project Structure
+```Project Structure
 
 nodejs-todo-cicd/
 │
@@ -59,8 +59,8 @@ nodejs-todo-cicd/
     ├── AWS-EC2-Instance.png
     ├── Final-Deployed-Application.png
     └── Jenkins-Pipeline-Success.png
-
-How to Run the Application Locally
+```
+##How to Run the Application Locally
 
 1. Clone the repository:
 
@@ -82,7 +82,7 @@ npm start
 
 http://localhost:3000
 
-Project Outcome
+##Project Outcome
 
 Successfully implemented an automated CI/CD pipeline using Jenkins, GitHub Webhooks, Docker, and AWS EC2.
 
